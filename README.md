@@ -1,11 +1,11 @@
-# SpeedRaceGame
-Juego para el curso de procesamiento digital de imágenes
+# Sign language alphabet recognizer
+This program recognizes the Colombian sign language from photos taken from a <br> computer camera and classified by a ML algorithm
 
-## Instrucciones
+## Instructions
 
-Para ejecutar el código se deben instalar las librerias necesarias <br>
-para ello correr: <br> - pip install -r requirements.txt
+To run code install requirements.txt <br>
+<br> - pip install -r requirements.txt
 <br>
-Correr el archivo main.py para ejecutar el móculo del juego y de la cámara.
+run main.py to execute program.
 <br>
 Python main.py
