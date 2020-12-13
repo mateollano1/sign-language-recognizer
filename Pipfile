@@ -14,6 +14,10 @@ tensorflow = "*"
 pandas = "*"
 numpy = "*"
 notebook = "*"
+matplotlib = "*"
+seaborn = "*"
+scipy = "*"
+pillow = "*"
 
 [requires]
 python_version = "3.6.8"
