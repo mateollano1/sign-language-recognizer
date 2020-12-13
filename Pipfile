@@ -1,0 +1,23 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+pygame = "==1.9.6"
+opencv-python = "==4.4.0.44"
+imutils = "==0.5.3"
+PyAutoGUI = "==0.9.52"
+tensorflow = "*"
+pandas = "*"
+numpy = "*"
+notebook = "*"
+matplotlib = "*"
+seaborn = "*"
+scipy = "*"
+pillow = "*"
+
+[requires]
+python_version = "3.6.8"
