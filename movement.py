@@ -19,7 +19,10 @@ import imutils
 import pyautogui
 from collections import deque
 import time
-
+import numpy as np
+import random
+from keras.models import load_model
+# model = load_model('./model.CNNmodel.h5')
 
 class Movement:
 
@@ -31,8 +34,7 @@ class Movement:
         #Definr color HSV del rango de color de objetos verdes
         self.greenLower = (29, 86, 6)
         self.greenUpper = (64, 255, 255)
-        # self.up_frame = self.load_image('imgs/fondo1.png')
-        # self.down_frame = self.load_image('imgs/up.png')
+
         #Usar en una estructura cola para almancenar los puntos en buffer
         self.buffer = 20
 
@@ -46,6 +48,10 @@ class Movement:
         # Start video capture
         self.video_camera()
 
+    def keras_predict(self, model, image):
+        random_ = str(random.randint(0, 5))
+        print(random_)
+        return random_
 
     '''
     Funcion con un ciclo para guardar la captura de la camara infinito
@@ -62,79 +68,30 @@ class Movement:
 
             x1, y1, x2, y2 = 50, 50, 250, 250
             img_cropped = frame[y1:y2, x1:x2]
+            
+            #image_data = cv2.imencode('.jpg', img_cropped)[1].tostring()
+            image_grayscale = cv2.cvtColor(img_cropped, cv2.COLOR_BGR2GRAY)
+            image_grayscale_blurred = cv2.GaussianBlur(image_grayscale, (15,15), 0)
+            im3 = cv2.resize(image_grayscale_blurred, (28,28), interpolation = cv2.INTER_AREA)
+            im4 = np.resize(im3, (28, 28, 1))
+            im5 = np.expand_dims(im4, axis=0)
+
+
+            #cv2.imshow("cropped", img_cropped)
+            cv2.imshow("cropped", im4)
+            pred_class = self.keras_predict("model", im5)
+            
             cv2.rectangle(frame, (x1, y1), (x2, y2), (255,0,0), 2)
-            image_data = cv2.imencode('.jpg', img_cropped)[1].tostring()
-
-
+            cv2.putText(frame, pred_class, (130, 300), cv2.FONT_HERSHEY_COMPLEX, 2.0, (255, 0, 0), lineType=cv2.LINE_AA)
             #---- Llamado de la función para aplicar las técnicas -------------------------
             hsv_converted_frame = self.filter_techniques(frame)
            
-            #---- Crear máscara para el frame, mostrando valores verdes -------------------
-            mask = cv2.inRange(hsv_converted_frame, self.greenLower, self.greenUpper)
-            #---- Erosionar la salida para eliminar los pequeños puntos blancos presentes en la imagen enmascarada
-            mask = cv2.erode(mask, None, iterations=2)
-            #---- Dilatar la imagen resultante para guardar como nuestro nuevo objetivo ---
-            mask = cv2.dilate(mask, None, iterations=2)
-
-            #---- Display the masked output in a different window --------------------------
-            cv2.imshow('Masked Output', mask)
-
-            #----  Encuentra todos los contornos en la imagen con la máscara --------------------
-            cnts, _ = cv2.findContours(
-                mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-            #----  Definir el centro de la imagen -----------------------------------------------
-            center = None
-
-            #----  Si hay algún objeto detectado, entonces procede ------------------------------
-            if(len(cnts)) > 0:
-                #----  Encuentra el contorno con la máxima área ---------------------------------
-                c = max(cnts, key=cv2.contourArea)
-                #----  Encuentra el centro del circulo y su radio de la detección mas grande del contorno
-                ((x, y), radius) = cv2.minEnclosingCircle(c)
-
-
-                #----  Calcular el centroide del área -------------------------------------------
-                center = self.centroid_calculate(c)
-
-                # if x > 210 and y < 276:
-                #     pyautogui.press("right")
-                # if x < 300 and y < 276:
-                #     pyautogui.press("left")
-                # if y > 277:
-                #     pyautogui.press("enter")
-                    
-                #----  Procede sólo si el tamaño del circulo es grande -------------------------
-                if radius > 10:
-                    #----  Dibujar los circulos alrededor del objeto ---------------------------
-                    cv2.circle(frame, (int(x), int(y)),
-                               int(radius), (0, 255, 255), 2)
-                    cv2.circle(frame, center, 5, (0, 255, 255), -1)
-
-                #----  Concatena los centroides detectados -------------------------------------
-                self.pts.appendleft(center)
-
-            #----  Mostrar el frame con la detección -------------------------------------------
-            alpha = 0.5
-            # added_image = cv2.addWeighted(frame[0:370, 0:500, :], alpha, self.up_frame[0:370, 0:500, :], 1-alpha, 0)
-            # frame[0:370, 0:500] = added_image
-
             cv2.imshow('Frame', frame)
             key = cv2.waitKey(1) & 0xFF
 
             #----  Si q se sale de la ventana --------------------------------------------------
             if(key == ord('q')): 
                 self.quit()
-
-
-#--------------------------------------------------------------------------
-#-- 3. Cálculo del centroide  --------------------
-#--------------------------------------------------------------------------
-    def centroid_calculate(self, c):
-        #----  Calcular el centroide alrededor del objeto para dibujarlo -----------------------
-        M = cv2.moments(c)
-        center = (int(M['m10'] / M['m00']), int(M['m01'] / M['m00']))
-        return center
 
 
     def load_image(self, image_url):
