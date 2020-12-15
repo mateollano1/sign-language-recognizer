@@ -21,8 +21,10 @@ from collections import deque
 import time
 import numpy as np
 import random
-from keras.models import load_model
-# model = load_model('./model.CNNmodel.h5')
+# import keras
+from tensorflow.python import keras
+
+model = keras.models.load_model('model_train.h5')
 
 class Movement:
 
@@ -49,9 +51,15 @@ class Movement:
         self.video_camera()
 
     def keras_predict(self, model, image):
-        random_ = str(random.randint(0, 5))
-        print(random_)
-        return random_
+        image_data = np.asarray( image, dtype="int32" )
+        # result = model.predict_classes(image)
+        pred_probab = model.predict(image_data)[0]
+        pred_class = list(pred_probab).index(max(pred_probab))
+        pred_pr, pred_cl = max(pred_probab), pred_class
+        print(chr(int(pred_cl)+65))
+        word = chr(int(pred_cl)+65)
+        # print(word)
+        return word
 
     '''
     Funcion con un ciclo para guardar la captura de la camara infinito
@@ -77,9 +85,9 @@ class Movement:
             im5 = np.expand_dims(im4, axis=0)
 
 
-            #cv2.imshow("cropped", img_cropped)
-            cv2.imshow("cropped", im4)
-            pred_class = self.keras_predict("model", im5)
+            cv2.imshow("cropped", img_cropped)
+            cv2.imshow("cropped_gray", im4)
+            pred_class = self.keras_predict(model, im5)
             
             cv2.rectangle(frame, (x1, y1), (x2, y2), (255,0,0), 2)
             cv2.putText(frame, pred_class, (130, 300), cv2.FONT_HERSHEY_COMPLEX, 2.0, (255, 0, 0), lineType=cv2.LINE_AA)
